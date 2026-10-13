@@ -1,0 +1,12 @@
+@import 'tailwindcss';
+@plugin "daisyui" {
+  themes:
+    nord --default,
+    night --prefersdark;
+}
+
+/* @theme {
+  --breakpoint-xl: 90rem;
+  --breakpoint-tablet: 800px;
+  --breakpoint-desktop: 1200px;
+} */

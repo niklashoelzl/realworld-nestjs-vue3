@@ -1,0 +1,24 @@
+services:
+  backend-nest:
+    build:
+      context: .
+      dockerfile: apps/backend/nest/Dockerfile
+    image: backend-nest
+    ports:
+      - "3001:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_MODE=prisma
+      - DATABASE_URL=file:/data/dev.db
+    volumes:
+      - ./data:/data
+
+  frontend-vue:
+    build:
+      context: .
+      dockerfile: apps/frontend/vue/Dockerfile
+      args:
+        VITE_API_URL: http://localhost:3001/api
+    image: frontend-vue
+    ports:
+      - "8080:80"

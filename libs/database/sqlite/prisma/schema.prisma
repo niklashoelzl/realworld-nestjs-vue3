@@ -1,0 +1,108 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// Get a free hosted Postgres database in seconds: npx create-db
+
+generator client {
+  provider = "prisma-client-js"
+  // output   = "./generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id            Int      @id @default(autoincrement())
+  email         String   @unique
+  username      String   @unique
+  password_hash String
+  bio           String?
+  profileImage  String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Subscriptions: dieser User als Subscriber
+  subscriptions Subscription[] @relation("Subscriber")
+  // Subscriptions: dieser User als Author
+  subscribers   Subscription[] @relation("Author")
+
+  // geschriebene Artikel
+  articles Article[]
+
+  // favorisierte Artikel
+  favorites Favorite[]
+
+  comments Comment[]
+
+  @@map("users")
+}
+
+model Article {
+  id          Int    @id @default(autoincrement())
+  slug        String @unique
+  title       String
+  description String
+  body        String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  authorId Int
+  author   User @relation(fields: [authorId], references: [id])
+
+  tags      Tag[]
+  favorites Favorite[]
+  comments  Comment[]
+
+  @@map("articles")
+}
+
+model Tag {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  articles Article[]
+
+  @@map("tags")
+}
+
+model Comment {
+  id   Int    @id @default(autoincrement())
+  body String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  authorId  Int
+  articleId Int
+
+  author  User    @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@map("comments")
+}
+
+model Favorite {
+  userId    Int
+  articleId Int
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, articleId])
+  @@map("favorites")
+}
+
+model Subscription {
+  subscriberId Int
+  authorId     Int
+
+  // Foreign Keys zu User
+  subscriber User @relation("Subscriber", fields: [subscriberId], references: [id], onDelete: Cascade)
+  author     User @relation("Author", fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@id([subscriberId, authorId])
+  @@index([subscriberId])
+  @@index([authorId])
+  @@map("subscriptions")
+}
